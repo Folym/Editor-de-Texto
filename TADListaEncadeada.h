@@ -1,4 +1,4 @@
-#define TF 5
+#define TF 79
 
 struct listaCar
 {
@@ -120,13 +120,11 @@ void insereCar(ListaLin **Linha,ListaCar **cursor, char car, PosicaoCur *posCur)
 	{
 		(*posCur).col += 1;
 		(*Linha)->nro++;
-	}
-	
+	}	
 }
 
 void retiraL(ListaLin **Linha)
 {
-	//if for o primeiro...
 	if((*Linha)->botton==NULL)
 	{
 		(*Linha)->top->botton = NULL;
@@ -140,6 +138,27 @@ void retiraL(ListaLin **Linha)
 	}
 }
 
+void ApagaTodasL(ListaLin**Linhas,ListaLin**Linha,ListaCar**cursor)
+{
+	while((*Linha)->botton!=NULL)
+		*Linha = (*Linha)-> botton;
+	while(*Linha!=NULL)
+	{
+		*cursor = (*Linha)->inicioL;
+		while((*cursor)->prox!=NULL)
+			*cursor = (*cursor)->prox;
+		while((*cursor!=NULL))
+		{
+			if((*cursor)->prox!=NULL)
+				free((*cursor)->prox);
+			*cursor = (*cursor)->ant;
+		}
+		free((*Linha)->inicioL);
+		*Linha = (*Linha)->top;
+		if(*Linha!=NULL)
+			free((*Linha)->botton);
+	}
+}
 void retiraCar(ListaLin **Linha, ListaCar *Caracter)
 {
 	if((Caracter)->ant==NULL)
@@ -161,17 +180,15 @@ void retiraCar(ListaLin **Linha, ListaCar *Caracter)
 
 void deleteCar(ListaLin**Linha, ListaCar**cursor, PosicaoCur *posCur)
 {
+	ListaCar *aux;
 	if((*cursor)->prox!=NULL)
 	{
 		if((*cursor)->prox->letra==27)
 		{
 			*cursor = (*cursor)->prox;
 			retiraCar(&(*Linha),(*cursor)->ant);
-			if((*cursor)->prox!=NULL)
-			{
-				*cursor = (*cursor)->prox;
-				retiraCar(&(*Linha),(*cursor)->ant);
-			}
+			*cursor = (*cursor)->prox;
+			retiraCar(&(*Linha),(*cursor)->ant);
 		}
 		else
 		{
@@ -184,7 +201,6 @@ void deleteCar(ListaLin**Linha, ListaCar**cursor, PosicaoCur *posCur)
 
 void backSpc(ListaLin **Linha, ListaCar **cursor, PosicaoCur *posCur)
 {
-	//MELHORAR PRA CASO O 27 ESTEJA NO COMEÇO DA FRASE
 	if((*cursor)->ant!=NULL)
 	{
 		if((*cursor)->ant->letra!=27)
@@ -318,6 +334,48 @@ void goLeft(ListaLin **Linha, ListaCar **cursor, PosicaoCur *posCur)
 	}
 }
 
+void pageUp(ListaLin*InicioPag, ListaLin**Linha, ListaCar**cursor, PosicaoCur *posCur)
+{
+	int cont=0;
+	while(*Linha!=InicioPag)
+	{
+		*Linha = (*Linha)->top;
+		cont++;
+	}
+	*cursor = (*Linha)->inicioL;
+	(*posCur).col=1;
+	(*posCur).lin = (*posCur).lin-cont;
+}
+
+void pageDown(ListaLin*InicioPag,ListaLin**Linha , ListaCar**cursor, PosicaoCur *posCur)
+{
+	int cont=0;
+	(*Linha) = InicioPag;
+	while((*Linha)->botton!=NULL && cont<20)
+	{
+		*Linha = (*Linha)->botton;
+		cont++;
+	}
+	*cursor = (*Linha)->inicioL;
+	while((*cursor)->prox!=NULL)
+		*cursor = (*cursor)->prox;
+	(*posCur).lin = cont+1;
+	(*posCur).col = (*Linha)->nro+1;
+}
+
+void goEnd(ListaLin**Linha, ListaCar**cursor, PosicaoCur *posCur)
+{
+	while((*cursor)->prox!=NULL)
+		*cursor = (*cursor)->prox;
+	(*posCur).col=(*Linha)->nro+1;
+}
+
+void goHome(ListaLin**Linha, ListaCar**cursor, PosicaoCur *posCur)
+{
+	*cursor = (*Linha)->inicioL;
+	(*posCur).col=1;
+}
+
 void exibLinhas(ListaLin *inicioPag, PosicaoCur posCur)
 {
 	char negt=0;
@@ -344,12 +402,11 @@ void exibLinhas(ListaLin *inicioPag, PosicaoCur posCur)
 				mostrar = mostrar->prox;
 				(posCur).col++;
 			}
-		}	
+		}
 		inicioPag = inicioPag->botton;
 		(posCur).lin++;
 		(posCur).col=1;
 	}
 	textcolor(WHITE);
 }
-
 
